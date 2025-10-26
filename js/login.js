@@ -1,49 +1,77 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // !IMPORTANT: Reemplaza con la URL de tu backend desplegado en Vercel
-    const BASE_API_URL = 'https://cryptobroker-pi.vercel.app/'; // <--- ¡Asegúrate de que esta sea la URL actual!
+// login.js
 
-    const loginForm = document.getElementById('loginForm');
-    const loginUsernameInput = document.getElementById('loginUsername');
-    const loginPasswordInput = document.getElementById('loginPassword');
+// 1. Conexión con Supabase
+const supabase = supabase.createClient(
+  'https://dufhqzqyhjronnrzaira.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1ZmhxenF5aGpyb25ucnphaXJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0MjY5ODYsImV4cCI6MjA3NzAwMjk4Nn0.q1rfdDkg2_5I0o_kpBIxKF1V2bpJlcJKDG54-zqu158'
+)
 
-    if (loginForm) {
-        loginForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
+// login.js
 
-            const username = loginUsernameInput.value.trim();
-            const password = loginPasswordInput.value.trim();
+import { createClient } from '@supabase/supabase-js'
 
-            try {
-                const response = await fetch(`${BASE_API_URL}/api/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                });
+// 1. Conexión con Supabase
+const supabase = createClient(
+  'https://TU_PROYECTO.supabase.co',
+  'TU_API_KEY_PUBLICA'
+)
 
-                const data = await response.json();
+// 2. Referencias al DOM
+const formLogin = document.getElementById('form-login')
+const inputEmail = document.getElementById('email')
+const inputPassword = document.getElementById('password')
+const mensajeError = document.getElementById('mensaje-error')
 
-                if (response.ok) {
-                    sessionStorage.setItem('authToken', data.token);
-                    sessionStorage.setItem('loggedInUser', JSON.stringify(data.user));
+// 3. Evento de login
+formLogin.addEventListener('submit', async (e) => {
+  e.preventDefault()
 
-                    if (data.user.isAdmin) {
-                        window.location.href = 'admin.html';
-                    } else {
-                        window.location.href = 'main.html';
-                    }
+  const email = inputEmail.value.trim()
+  const password = inputPassword.value.trim()
 
-                } else {
-                    alert(data.message || 'Error en el inicio de sesión.');
-                    console.error('Error de login:', data);
-                }
-            } catch (error) {
-                console.error('Error de red al iniciar sesión:', error);
-                alert('No se pudo conectar con el servidor. Asegúrate de que el backend esté corriendo.');
-            }
-        });
-    } else {
-        console.error("Elemento loginForm no encontrado.");
+  if (!email || !password) {
+    mensajeError.textContent = 'Completa todos los campos'
+    return
+  }
+
+  try {
+    // Autenticación con Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    })
+
+    if (error || !data.user) {
+      mensajeError.textContent = 'Correo o contraseña incorrectos'
+      return
     }
-});
+
+    // Obtener perfil del usuario
+    const { data: perfil, error: perfilError } = await supabase
+      .from('users')
+      .select('nombre, rol')
+      .eq('id', data.user.id)
+      .single()
+
+    if (perfilError || !perfil) {
+      mensajeError.textContent = 'No se pudo cargar el perfil'
+      return
+    }
+
+    // Guardar sesión
+    sessionStorage.setItem(
+      'loggedInUser',
+      JSON.stringify({ info: perfil, isAdmin: perfil.rol === 'admin' })
+    )
+
+    // Redirección según rol
+    if (perfil.rol === 'admin') {
+      window.location.href = 'admin.html'
+    } else {
+      window.location.href = 'main.html'
+    }
+  } catch (err) {
+    console.error('Error inesperado:', err)
+    mensajeError.textContent = 'Error inesperado al iniciar sesión'
+  }
+})

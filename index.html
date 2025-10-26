@@ -137,63 +137,67 @@
 
                     <!-- Login Form -->
                     <div class="login-form-wrapper">
-                        <form id="loginForm" class="login-form">
-                            
-                            <div class="form-group">
-                                <label for="loginUsername" class="form-label">Online ID</label>
-                                <div class="input-wrapper">
-                                    <span class="input-icon">
-                                        <svg fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                                        </svg>
-                                    </span>
-                                    <input 
-                                        type="text" 
-                                        id="loginUsername" 
-                                        required
-                                        class="form-input"
-                                        placeholder="Enter your Online ID"
-                                    >
-                                </div>
-                            </div>
+  <form id="loginForm" class="login-form">
+    
+    <div class="form-group">
+      <label for="email" class="form-label">Correo electrónico</label>
+      <div class="input-wrapper">
+        <span class="input-icon">
+          <svg fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+          </svg>
+        </span>
+        <input 
+          type="email" 
+          id="email" 
+          required
+          class="form-input"
+          placeholder="Ingresa tu correo"
+        >
+      </div>
+    </div>
 
-                            <div class="form-group">
-                                <label for="loginPassword" class="form-label">Passcode</label>
-                                <div class="input-wrapper">
-                                    <span class="input-icon">
-                                        <svg fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
-                                        </svg>
-                                    </span>
-                                    <input 
-                                        type="password" 
-                                        id="loginPassword" 
-                                        required
-                                        class="form-input"
-                                        placeholder="Enter your passcode"
-                                    >
-                                </div>
-                            </div>
+    <div class="form-group">
+      <label for="password" class="form-label">Contraseña</label>
+      <div class="input-wrapper">
+        <span class="input-icon">
+          <svg fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+          </svg>
+        </span>
+        <input 
+          type="password" 
+          id="password" 
+          required
+          class="form-input"
+          placeholder="Ingresa tu contraseña"
+        >
+      </div>
+    </div>
 
-                            <div class="form-options">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" class="checkbox-input">
-                                    <span class="checkbox-text">Remember Online ID</span>
-                                </label>
-                                <a href="#" class="forgot-link">Forgot ID/Passcode?</a>
-                            </div>
+    <div class="form-options">
+      <label class="checkbox-label">
+        <input type="checkbox" class="checkbox-input">
+        <span class="checkbox-text">Recordar correo</span>
+      </label>
+      <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+    </div>
 
-                            <button type="submit" class="btn-primary">Sign In</button>
+    <button type="submit" class="btn-primary">Ingresar</button>
 
-                            <div class="divider">
-                                <span class="divider-text">or</span>
-                            </div>
+    <p id="mensaje-error" class="error-text"></p>
 
-                            <button type="button" id="registerBtn" class="btn-secondary">
-                                Create New Account
-                            </button>
+    <div class="divider">
+      <span class="divider-text">o</span>
+    </div>
 
-                        </form>
+    <button type="button" id="registerBtn" class="btn-secondary">
+      Crear nueva cuenta
+    </button>
+
+  </form>
+</div>
+
 
                         <!-- Security Notice -->
                         <div class="security-notice">
@@ -293,10 +297,10 @@
     </footer>
 
     <!-- Firebase Integration -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="js/app.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="js/login.js"></script>
+
 
 </body>
 </html>
