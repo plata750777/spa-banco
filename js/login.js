@@ -7,7 +7,7 @@ const supabase = window.supabase.createClient(
 )
 
 // 2. Referencias al DOM
-const formLogin = document.getElementById('loginForm')
+const formLogin = document.getElementById('loginForm') // ✅ correcto
 const inputEmail = document.getElementById('email')
 const inputPassword = document.getElementById('password')
 const mensajeError = document.getElementById('mensaje-error')
