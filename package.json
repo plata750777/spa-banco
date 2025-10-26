@@ -1,0 +1,20 @@
+{
+  "name": "mi-proyecto-crypto",
+  "version": "1.0.0",
+  "description": "Proyecto Firebase y Tailwind",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "postcss ./src/input.css -o ./dist/output.css",
+    "watch:css": "postcss ./src/input.css -o ./dist/output.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.16",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "tailwindcss": "^4.1.16"
+  }
+}

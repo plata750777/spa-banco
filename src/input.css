@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tipografía Inter */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+/* Variables BOA */
+:root {
+  --boa-red: #e31837;
+  --boa-blue: #012169;
+  --boa-navy: #001e62;
+}
+
+/* Clases personalizadas */
+.text-boa-red { color: var(--boa-red); }
+.text-boa-blue { color: var(--boa-blue); }
+.text-boa-navy { color: var(--boa-navy); }
+.bg-boa-red { background-color: var(--boa-red); }
+.bg-boa-blue { background-color: var(--boa-blue); }
+.bg-boa-navy { background-color: var(--boa-navy); }
+.border-boa-red { border-color: var(--boa-red); }
+.border-boa-blue { border-color: var(--boa-blue); }
+.hover\:text-boa-red:hover { color: var(--boa-red); }
+.hover\:bg-boa-red:hover { background-color: var(--boa-red); }
+.hover\:bg-boa-blue:hover { background-color: var(--boa-blue); }
+.focus\:border-boa-blue:focus { border-color: var(--boa-blue); }
+
+/* Transiciones suaves */
+* {
+  transition-property: color, background-color, border-color, transform, box-shadow;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: var(--boa-blue); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--boa-red); }
+
+/* Renderizado de fuente */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
