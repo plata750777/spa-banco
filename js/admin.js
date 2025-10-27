@@ -154,6 +154,8 @@ function openCreateModal() {
       el.value = '';
     }
   });
+const passwordInput = document.getElementById('userPassword');
+if (passwordInput) passwordInput.value = '';
 
   // Mostrar modal
   document.getElementById('userModal').style.display = 'block';
@@ -183,7 +185,7 @@ async function handleUserSubmit(e) {
 
   const userData = {};
   const fields = [
-    'correo','nombre','cuenta','estado','saldoAhorros','saldoCorriente','saldoTarjeta',
+    'email','nombre','cuenta','estado','saldoAhorros','saldoCorriente','saldoTarjeta',
     'trabajo','salario','gastos','deudas','inversiones','consignaciones','creditos','pagos',
     'direccion','residencia','estadoCivil','personasCargo',
     'tipoCuenta','fechaApertura','tasaInteres'
@@ -222,13 +224,16 @@ async function handleUserSubmit(e) {
     if (error) alert('Error al actualizar: ' + error.message);
     else alert('Usuario actualizado');
   } else {
-    const password = document.getElementById('userPassword').value;
-
+  
     // ✅ Solo validamos correo y contraseña
-    if (!userData.correo || !password) {
-      alert('Debes ingresar al menos correo y contraseña');
-      return;
-    }
+    const passwordInput = document.getElementById('userPassword');
+    const password = passwordInput?.value?.trim();
+
+    if (!userData.correo?.trim() || !password) {
+    alert('Debes ingresar al menos correo y contraseña');
+    return;
+}
+
 
     // ✅ Valores por defecto si no se ingresan
     userData.nombre = userData.nombre || 'Sin nombre';
