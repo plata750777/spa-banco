@@ -1,8 +1,8 @@
 // ✅ Supabase ya está cargado desde el HTML
 const supabase = window.supabase.createClient(
-  'https://dufhqzqyhjronnrzaira.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-)
+ 'https://dufhqzqyhjronnrzaira.supabase.co',
+ 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1ZmhxenF5aGpyb25ucnphaXJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0MjY5ODYsImV4cCI6MjA3NzAwMjk4Nn0.q1rfdDkg2_5I0o_kpBIxKF1V2bpJlcJKDG54-zqu158',
+);
 
 // Variables globales
 let user
@@ -11,16 +11,19 @@ let dynamicKeyInterval
 let timerRotationInterval
 
 // Inicialización cuando el DOM está listo
-document.addEventListener('DOMContentLoaded', () => {
-  user = JSON.parse(sessionStorage.getItem('loggedInUser'))
+document.addEventListener('DOMContentLoaded', async () => {
+  const session = await fetchUserFromSupabase();
 
-  if (!user || user.isAdmin) {
-    window.location.href = 'index.html'
-    return
+  if (!session || session.isAdmin) {
+    window.location.href = 'index.html';
+    return;
   }
 
-  inicializarPagina()
-})
+  user = session;
+  sessionStorage.setItem('loggedInUser', JSON.stringify(user));
+  inicializarPagina();
+});
+
 
 // Función principal
 function inicializarPagina() {
@@ -259,3 +262,24 @@ function resetSessionTimeout() {
   document.addEventListener(evt, resetSessionTimeout)
 );
 
+async function fetchUserFromSupabase() {
+  const session = JSON.parse(sessionStorage.getItem('loggedInUser'));
+  if (!session?.user?.id) return null;
+
+  const { data, error } = await supabase.from('users').select('*').eq('id', session.user.id).single();
+  if (error) {
+    console.warn('Error al obtener usuario desde Supabase:', error.message);
+    return null;
+  }
+
+  return { ...session, info: data };
+}
+async function actualizarDatosDesdeSupabase() {
+  const session = await fetchUserFromSupabase();
+  if (!session || session.isAdmin) return;
+
+  user = session;
+  sessionStorage.setItem('loggedInUser', JSON.stringify(user));
+  cargarDatosUsuario();
+  renderMovementsChart();
+}
