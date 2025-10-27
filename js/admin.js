@@ -185,7 +185,7 @@ async function handleUserSubmit(e) {
 
   const userData = {};
   const fields = [
-    'email','nombre','cuenta','estado','saldoAhorros','saldoCorriente','saldoTarjeta',
+    'correo','nombre','cuenta','estado','saldoAhorros','saldoCorriente','saldoTarjeta',
     'trabajo','salario','gastos','deudas','inversiones','consignaciones','creditos','pagos',
     'direccion','residencia','estadoCivil','personasCargo',
     'tipoCuenta','fechaApertura','tasaInteres'
