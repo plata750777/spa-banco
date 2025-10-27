@@ -104,16 +104,18 @@ async function openEditModal(userId) {
   }
 
   // Cargar todos los campos que existan en el DOM
-  for (const key in data) {
+  Object.keys(data).forEach((key) => {
     const input = document.getElementById(`user${capitalize(key)}`);
     if (input) {
       if (input.type === 'number') {
         input.value = parseFloat(data[key]) || 0;
+      } else if (input.type === 'date' && data[key]) {
+        input.value = new Date(data[key]).toISOString().split('T')[0];
       } else {
         input.value = data[key] ?? '';
       }
     }
-  }
+  });
 
   // Ocultar campo de contraseña al editar
   const passwordGroup = document.getElementById('passwordGroup');
@@ -125,23 +127,38 @@ async function openEditModal(userId) {
 
   // Mostrar modal
   document.getElementById('userModal').style.display = 'block';
+  
+  actualizarGraficoMovimientos();
+
 }
+
 
 function openCreateModal() {
   currentEditingUserId = null;
+
+  // Ajustar encabezado y botón
   document.getElementById('modalTitle').textContent = 'Crear Usuario';
   document.getElementById('submitBtn').textContent = 'Crear Usuario';
-  document.getElementById('passwordGroup').style.display = 'block';
-  document.getElementById('userModal').style.display = 'block';
 
+  // Mostrar campo de contraseña
+  const passwordGroup = document.getElementById('passwordGroup');
+  if (passwordGroup) passwordGroup.style.display = 'block';
+
+  // Limpiar todos los campos del formulario
   document.querySelectorAll('#userForm input, #userForm select').forEach(el => {
-    el.value = el.type === 'number' ? 0 : '';
+    if (el.type === 'number') {
+      el.value = 0;
+    } else if (el.type === 'date') {
+      el.value = '';
+    } else {
+      el.value = '';
+    }
   });
+
+  // Mostrar modal
+  document.getElementById('userModal').style.display = 'block';
 }
 
-function closeUserModal() {
-  document.getElementById('userModal').style.display = 'none';
-}
 
 function closeDeleteModal() {
   document.getElementById('deleteModal').style.display = 'none';
@@ -167,10 +184,12 @@ async function handleUserSubmit(e) {
   const userData = {};
   const fields = [
     'correo','nombre','cuenta','estado','saldoAhorros','saldoCorriente','saldoTarjeta',
-    'trabajo','salario','gastos','deudas','inversiones','consignaciones','creditos','pagos'
+    'trabajo','salario','gastos','deudas','inversiones','consignaciones','creditos','pagos',
+    'direccion','residencia','estadoCivil','personasCargo',
+    'tipoCuenta','fechaApertura','tasaInteres'
   ];
 
-  // Captura todos los campos
+  // Captura todos los campos del formulario
   fields.forEach((f) => {
     const el = document.getElementById(`user${capitalize(f)}`);
     if (!el) return;
@@ -230,6 +249,7 @@ async function handleUserSubmit(e) {
   closeUserModal();
   loadUsers();
 }
+
 
 
 async function confirmDelete() {

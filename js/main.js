@@ -9,6 +9,7 @@ let user
 let sessionTimeout
 let dynamicKeyInterval
 let timerRotationInterval
+let movementsChart;
 
 // Inicialización cuando el DOM está listo
 document.addEventListener('DOMContentLoaded', async () => {
@@ -285,3 +286,44 @@ async function actualizarDatosDesdeSupabase() {
   cargarDatosUsuario();
   renderMovementsChart();
 }
+
+
+function inicializarGraficoMovimientos(consignaciones = 0, creditos = 0, pagos = 0) {
+  const ctx = document.getElementById('movementsChart').getContext('2d');
+
+  if (movementsChart) {
+    movementsChart.destroy(); // 🔄 Reinicia si ya existe
+  }
+
+  movementsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Consignaciones', 'Créditos', 'Pagos'],
+      datasets: [{
+        label: 'Movimientos ($)',
+        data: [consignaciones, creditos, pagos],
+        backgroundColor: ['#4caf50', '#2196f3', '#f44336']
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+function actualizarGraficoMovimientos() {
+  const consignaciones = parseFloat(document.getElementById('userConsignaciones')?.value) || 0;
+  const creditos = parseFloat(document.getElementById('userCreditos')?.value) || 0;
+  const pagos = parseFloat(document.getElementById('userPagos')?.value) || 0;
+
+  inicializarGraficoMovimientos(consignaciones, creditos, pagos);
+}
+
+['userConsignaciones', 'userCreditos', 'userPagos'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', actualizarGraficoMovimientos);
+});
