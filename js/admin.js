@@ -203,13 +203,17 @@ async function handleUserSubmit(e) {
     if (error) alert('Error al actualizar: ' + error.message);
     else alert('Usuario actualizado');
   } else {
-    // Validación solo al crear
     const password = document.getElementById('userPassword').value;
 
-    if (!userData.correo || !password || !userData.nombre || !userData.cuenta) {
-      alert('Por favor completa los campos obligatorios');
+    // ✅ Solo validamos correo y contraseña
+    if (!userData.correo || !password) {
+      alert('Debes ingresar al menos correo y contraseña');
       return;
     }
+
+    // ✅ Valores por defecto si no se ingresan
+    userData.nombre = userData.nombre || 'Sin nombre';
+    userData.cuenta = userData.cuenta || '00000000';
 
     const { data: authUser, error: authError } = await supabase.auth.signUp({ email: userData.correo, password });
     if (authError || !authUser?.user?.id) {
