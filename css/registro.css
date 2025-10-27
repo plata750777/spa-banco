@@ -1,0 +1,72 @@
+/* === Registro - America of Bank === */
+
+body {
+  background-color: #121212;
+  font-family: 'Inter', sans-serif;
+  color: #f1f1f1;
+}
+
+.container-box {
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+h3 {
+  font-weight: 700;
+  text-align: center;
+  color: #00bcd4;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #ccc;
+}
+
+.form-control {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  color: #fff;
+}
+
+.form-control:focus {
+  border-color: #00bcd4;
+  box-shadow: none;
+}
+
+.input-group-text {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: #00bcd4;
+  border: none;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background-color: #0097a7;
+}
+
+.alert {
+  font-size: 0.9rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.text-warning {
+  text-decoration: underline;
+}
+
+.form-check-label {
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
+.form-check-input:checked {
+  background-color: #00bcd4;
+  border-color: #00bcd4;
+}
