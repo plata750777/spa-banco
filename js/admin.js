@@ -166,7 +166,8 @@ function setupEventListeners() {
     logout({ auto: false, redirect: 'index.html' });
   });
 
-  document.getElementById('searchInput').addEventListener('input', searchUsers);
-  document.getElementById('createBtn')?.addEventListener('click', openCreateModal);
+  document.getElementById('searchBtn').addEventListener('click', searchUsers);
+  document.getElementById('createBtn').addEventListener('click', openCreateModal);
 }
+
 
