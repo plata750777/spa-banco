@@ -84,20 +84,46 @@ function updateStats(users) {
 
 async function openEditModal(userId) {
   currentEditingUserId = userId;
-  const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
   if (error || !data) {
     alert('Error al cargar usuario');
     return;
   }
 
-  for (const key in data) {
-    const input = document.getElementById(`user${capitalize(key)}`);
-    if (input) input.value = data[key];
+  // Mostrar saldo total si el campo existe
+  const saldoTotalEl = document.getElementById('userSaldoTotal');
+  if (saldoTotalEl) {
+    const total = (data.saldoAhorros || 0) + (data.saldoCorriente || 0);
+    saldoTotalEl.value = total.toFixed(2);
   }
 
-  document.getElementById('passwordGroup').style.display = 'none';
+  // Cargar todos los campos que existan en el DOM
+  for (const key in data) {
+    const input = document.getElementById(`user${capitalize(key)}`);
+    if (input) {
+      if (input.type === 'number') {
+        input.value = parseFloat(data[key]) || 0;
+      } else {
+        input.value = data[key] ?? '';
+      }
+    }
+  }
+
+  // Ocultar campo de contraseña al editar
+  const passwordGroup = document.getElementById('passwordGroup');
+  if (passwordGroup) passwordGroup.style.display = 'none';
+
+  // Ajustar encabezado y botón
   document.getElementById('modalTitle').textContent = 'Editar Usuario';
   document.getElementById('submitBtn').textContent = 'Guardar Cambios';
+
+  // Mostrar modal
   document.getElementById('userModal').style.display = 'block';
 }
 
@@ -137,19 +163,47 @@ function capitalize(str) {
 
 async function handleUserSubmit(e) {
   e.preventDefault();
-  const userData = {};
-  const fields = ['correo','nombre','cuenta','estado','saldoAhorros','saldoCorriente','saldoTarjeta','trabajo','salario','gastos','deudas','inversiones','consignaciones','creditos','pagos'];
 
+  const userData = {};
+  const fields = [
+    'correo','nombre','cuenta','estado','saldoAhorros','saldoCorriente','saldoTarjeta',
+    'trabajo','salario','gastos','deudas','inversiones','consignaciones','creditos','pagos'
+  ];
+
+  // Captura todos los campos
   fields.forEach((f) => {
     const el = document.getElementById(`user${capitalize(f)}`);
-    userData[f] = el?.type === 'number' ? parseFloat(el.value) || 0 : el?.value || '';
+    if (!el) return;
+    const valor = el.type === 'number' ? parseFloat(el.value) : el.value;
+    if (valor !== '' && valor !== null && !isNaN(valor)) {
+      userData[f] = el.type === 'number' ? valor : valor.trim();
+    }
   });
 
+  // Si existe campo de saldo total, lo usamos
+  const saldoTotalEl = document.getElementById('userSaldoTotal');
+  if (saldoTotalEl && saldoTotalEl.value !== '') {
+    const saldoTotal = parseFloat(saldoTotalEl.value);
+    if (!isNaN(saldoTotal)) {
+      userData.saldoAhorros = saldoTotal / 2;
+      userData.saldoCorriente = saldoTotal / 2;
+    }
+  }
+
   if (currentEditingUserId) {
-    const { error } = await supabase.from('users').update(userData).eq('id', currentEditingUserId);
+    // Solo actualiza campos con valor
+    const camposActualizados = {};
+    for (const key in userData) {
+      if (userData[key] !== '' && userData[key] !== null && userData[key] !== undefined) {
+        camposActualizados[key] = userData[key];
+      }
+    }
+
+    const { error } = await supabase.from('users').update(camposActualizados).eq('id', currentEditingUserId);
     if (error) alert('Error al actualizar: ' + error.message);
     else alert('Usuario actualizado');
   } else {
+    // Validación solo al crear
     const password = document.getElementById('userPassword').value;
 
     if (!userData.correo || !password || !userData.nombre || !userData.cuenta) {
@@ -172,6 +226,7 @@ async function handleUserSubmit(e) {
   closeUserModal();
   loadUsers();
 }
+
 
 async function confirmDelete() {
   if (!currentEditingUserId) return;

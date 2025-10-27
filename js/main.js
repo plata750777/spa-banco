@@ -14,6 +14,8 @@ let timerRotationInterval
 document.addEventListener('DOMContentLoaded', async () => {
   const session = await fetchUserFromSupabase();
 
+  console.log('Sesión cargada desde sessionStorage:', session);
+
   if (!session || session.isAdmin) {
     window.location.href = 'index.html';
     return;
