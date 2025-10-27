@@ -24,33 +24,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Función principal
 function inicializarPagina() {
-  cargarDatosUsuario()
-  generateDynamicKey()
-  dynamicKeyInterval = setInterval(generateDynamicKey, 30000)
-  simulateTimerCircle()
-  configurarEventos()
-  renderMovementsChart()
-  resetSessionTimeout()
+  cargarDatosUsuario();
+  startDynamicKeyCycle();       // 🔄 clave + temporizador sincronizados
+  configurarEventos();          // 🎯 listeners y control de sesión
+  renderMovementsChart();       // 📊 gráfico de movimientos
+  resetSessionTimeout();        // ⏱️ control de inactividad
 }
+
 
 // Cargar datos del usuario en la interfaz
 function cargarDatosUsuario() {
-  const info = user.info
+  if (!user || !user.info) {
+    console.warn('Datos de usuario no disponibles');
+    return;
+  }
 
-  document.getElementById('userGreeting').textContent = `Hola, ${info.nombre}`
-  document.getElementById('accountNumber').textContent = `Número de Cuenta: ${info.cuenta}`
-  document.getElementById('accountBalance').textContent = `Saldo disponible: ${formatCurrency(info.saldoAhorros)}`
-  document.getElementById('accountType').textContent = `Tipo de Cuenta: ${info.tipoCuenta || 'Ahorros'}`
+  const info = user.info;
 
-  document.getElementById('modalAccountNumber').textContent = info.cuenta
-  document.getElementById('modalAccountType').textContent = info.tipoCuenta || 'Cuenta Ahorros'
-  document.getElementById('modalOpeningDate').textContent = info.fechaApertura || 'N/A'
-  document.getElementById('modalInterestRate').textContent = info.tasaInteres !== undefined ? `${info.tasaInteres}% EA` : '1.5% EA'
+  // Helper para texto plano
+  const setText = (id, value) => {
+    document.getElementById(id).textContent = value || 'N/A';
+  };
 
-  document.getElementById('savingsBalance').textContent = formatCurrency(info.saldoAhorros)
-  document.getElementById('currentBalance').textContent = formatCurrency(info.saldoCorriente)
-  document.getElementById('creditCardBalance').textContent = formatCurrency(info.saldoTarjeta)
+  // Helper para valores monetarios
+  const setCurrency = (id, value) => {
+    document.getElementById(id).textContent = formatCurrency(value);
+  };
 
+  // Datos principales
+  setText('userGreeting', `Hola, ${info.nombre || 'Usuario'}`);
+  setText('accountNumber', `Número de Cuenta: ${info.cuenta}`);
+  setCurrency('accountBalance', info.saldoAhorros);
+  setText('accountType', `Tipo de Cuenta: ${info.tipoCuenta || 'Ahorros'}`);
+
+  // Modal
+  setText('modalAccountNumber', info.cuenta);
+  setText('modalAccountType', info.tipoCuenta || 'Cuenta Ahorros');
+  setText('modalOpeningDate', info.fechaApertura);
+  setText('modalInterestRate', info.tasaInteres !== undefined ? `${info.tasaInteres}% EA` : '1.5% EA');
+
+  // Saldos
+  setCurrency('savingsBalance', info.saldoAhorros);
+  setCurrency('currentBalance', info.saldoCorriente);
+  setCurrency('creditCardBalance', info.saldoTarjeta);
+
+  // Información adicional
   document.getElementById('additionalInfo').innerHTML = `
     <h2>Información Personal</h2>
     <p><strong>Dirección:</strong> ${info.direccion || 'N/A'}</p>
@@ -63,29 +81,55 @@ function cargarDatosUsuario() {
     <p><strong>Gastos mensuales:</strong> ${info.gastos !== null ? formatCurrency(info.gastos) : 'N/A'}</p>
     <p><strong>Deudas:</strong> ${info.deudas !== null ? formatCurrency(info.deudas) : 'N/A'}</p>
     <p><strong>Inversiones:</strong> ${info.inversiones !== null ? formatCurrency(info.inversiones) : 'N/A'}</p>
-  `
+  `;
 }
 
 // Formatear como moneda
-function formatCurrency(num) {
-  return num.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+function formatCurrency(valor) {
+  const num = Number(valor);
+  return isNaN(num)
+    ? '$0.00'
+    : num.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 }
+
+
 
 // Clave dinámica
+// 🔐 Genera una nueva clave dinámica cada 30s
 function generateDynamicKey() {
-  const newKey = Math.floor(100000 + Math.random() * 900000)
-  document.getElementById('dynamicKey').textContent = newKey.toString().replace(/(\d{3})(\d{3})/, '$1 $2')
+  const newKey = Math.floor(100000 + Math.random() * 900000);
+  const formattedKey = newKey.toString().replace(/(\d{3})(\d{3})/, '$1 $2');
+
+  const keyElement = document.getElementById('dynamicKey');
+  if (keyElement) keyElement.textContent = formattedKey;
 }
 
-// Temporizador visual
+// 🔄 Temporizador visual sincronizado con la clave
 function simulateTimerCircle() {
-  const timerCircle = document.getElementById('timerCircle')
-  let rotation = 0
+  const timerCircle = document.getElementById('timerCircle');
+  if (!timerCircle) return;
+
+  let secondsElapsed = 0;
+  timerCircle.style.transform = 'rotate(0deg)';
+
   timerRotationInterval = setInterval(() => {
-    rotation += 12
-    timerCircle.style.transform = `rotate(${rotation}deg)`
-  }, 1000)
+    secondsElapsed++;
+    const rotation = (secondsElapsed / 30) * 360;
+    timerCircle.style.transform = `rotate(${rotation}deg)`;
+
+    if (secondsElapsed >= 30) {
+      secondsElapsed = 0;
+      generateDynamicKey(); // sincroniza con nueva clave
+    }
+  }, 1000);
 }
+
+// 🧩 Inicia ambos ciclos sincronizados
+function startDynamicKeyCycle() {
+  generateDynamicKey(); // clave inicial
+  simulateTimerCircle(); // temporizador visual
+}
+
 
 // Gráfico de movimientos
 function renderMovementsChart() {
@@ -122,23 +166,32 @@ function renderMovementsChart() {
 
 // Eventos
 function configurarEventos() {
-  document.getElementById('logoutBtn').addEventListener('click', logout)
-  document.getElementById('transferForm').addEventListener('submit', processTransfer)
+  // ✅ Cierre de sesión con redirección
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    logout({ auto: false, redirect: 'index.html' });
+  });
 
+  // ✅ Envío de formulario de transferencia
+  document.getElementById('transferForm').addEventListener('submit', processTransfer);
+
+  // ✅ Cierre de modales al hacer clic fuera
   window.addEventListener('click', (event) => {
     for (const modal of document.getElementsByClassName('modal')) {
-      if (event.target === modal) modal.style.display = 'none'
+      if (event.target === modal) modal.style.display = 'none';
     }
-  })
+  });
 
+  // ✅ Reinicio de temporizador de sesión por actividad
   ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach((event) => {
-    document.addEventListener(event, resetSessionTimeout, false)
-  })
+    document.addEventListener(event, resetSessionTimeout, false);
+  });
 
+  // ✅ Limpieza de sesión al cerrar pestaña
   window.addEventListener('beforeunload', () => {
-    sessionStorage.removeItem('loggedInUser')
-  })
+    sessionStorage.removeItem('loggedInUser');
+  });
 }
+
 
 // Modales
 function openModal() { document.getElementById('myModal').style.display = 'block' }
@@ -169,20 +222,40 @@ function processTransfer(event) {
   }, 2000)
 }
 
-// Cerrar sesión
-function logout() {
-  clearInterval(dynamicKeyInterval)
-  clearInterval(timerRotationInterval)
-  clearTimeout(sessionTimeout)
-  sessionStorage.removeItem('loggedInUser')
-  window.location.href = 'index.html'
+// Cierre de sesión (manual o automático)
+function logout({ auto = false, redirect = 'index.html' } = {}) {
+  try {
+    // Detener intervalos activos
+    if (typeof dynamicKeyInterval !== 'undefined') clearInterval(dynamicKeyInterval);
+    if (typeof timerRotationInterval !== 'undefined') clearInterval(timerRotationInterval);
+    if (typeof sessionTimeout !== 'undefined') clearTimeout(sessionTimeout);
+
+    // Limpiar sesión local
+    sessionStorage.removeItem('loggedInUser');
+
+    // Cierre en Supabase (si aplica)
+    if (typeof supabase !== 'undefined') {
+      supabase.auth.signOut().catch(err => console.warn('Error al cerrar sesión Supabase:', err));
+    }
+
+    // Mensaje si es automático
+    if (auto) alert('Sesión expirada por inactividad.');
+
+    // Redirigir
+    window.location.href = redirect;
+  } catch (err) {
+    console.error('Error en logout:', err);
+  }
 }
 
 // Control de sesión por inactividad
 function resetSessionTimeout() {
-  clearTimeout(sessionTimeout)
-  sessionTimeout = setTimeout(() => {
-    alert('Sesión expirada por inactividad.')
-    logout()
-  }, 2 * 60 * 1000)
+  if (typeof sessionTimeout !== 'undefined') clearTimeout(sessionTimeout);
+  sessionTimeout = setTimeout(() => logout({ auto: true }), 2 * 60 * 1000); // 2 minutos
 }
+
+// Reiniciar temporizador en cada interacción
+['click', 'mousemove', 'keydown'].forEach(evt =>
+  document.addEventListener(evt, resetSessionTimeout)
+);
+
