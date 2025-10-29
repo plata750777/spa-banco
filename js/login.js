@@ -7,7 +7,17 @@ const inputEmail = document.getElementById('email');
 const inputPassword = document.getElementById('password');
 const mensajeError = document.getElementById('mensaje-error');
 
+<<<<<<< HEAD
 // ✅ Evento de login (envía a un endpoint seguro del servidor)
+=======
+// 2. Referencias al DOM
+const formLogin = document.getElementById('loginForm') // ✅ correcto
+const inputEmail = document.getElementById('email')
+const inputPassword = document.getElementById('password')
+const mensajeError = document.getElementById('mensaje-error')
+
+// 3. Evento de login
+>>>>>>> 6939196 (Actualización: migración completa a Supabase y limpieza de Firebase)
 formLogin.addEventListener('submit', async (e) => {
     e.preventDefault();
 
