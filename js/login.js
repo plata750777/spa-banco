@@ -1,8 +1,5 @@
-// ✅ Conexión con Supabase
-const supabase = window.supabase.createClient(
-  'https://dufhqzqyhjronnrzaira.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1ZmhxenF5aGpyb25ucnphaXJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0MjY5ODYsImV4cCI6MjA3NzAwMjk4Nn0.q1rfdDkg2_5I0o_kpBIxKF1V2bpJlcJKDG54-zqu158'
-);
+// El script ya NO tiene la clave API de Supabase, lo que neutraliza el riesgo de exposición.
+// La lógica de roles de administrador y las redirecciones condicionales han sido eliminadas.
 
 // ✅ Referencias al DOM
 const formLogin = document.getElementById('loginForm');
@@ -10,47 +7,54 @@ const inputEmail = document.getElementById('email');
 const inputPassword = document.getElementById('password');
 const mensajeError = document.getElementById('mensaje-error');
 
-// ✅ Evento de login
+// ✅ Evento de login (envía a un endpoint seguro del servidor)
 formLogin.addEventListener('submit', async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const email = inputEmail.value.trim();
-  const password = inputPassword.value.trim();
+    const email = inputEmail.value.trim();
+    const password = inputPassword.value.trim();
+    
+    // Desactivar el botón para prevenir envíos múltiples
+    const loginButton = formLogin.querySelector('.login-button');
+    loginButton.disabled = true;
 
-  if (!email || !password) {
-    mensajeError.textContent = 'Completa todos los campos';
-    mensajeError.classList.add('error-text');
-    return;
-  }
+    if (!email || !password) {
+        mensajeError.textContent = 'Completa todos los campos';
+        loginButton.disabled = false;
+        return;
+    }
 
-  // 🔐 Autenticación
-  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
-  if (authError || !authData?.user) {
-    mensajeError.textContent = 'Credenciales incorrectas';
-    mensajeError.classList.add('error-text');
-    return;
-  }
+    try {
+        // 🔐 Petición Segura: Envía credenciales al servidor (backend)
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
 
-  // 📋 Obtener perfil desde tabla 'users'
-  const { data: perfil, error: perfilError } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', authData.user.id)
-    .single();
+        const result = await response.json();
 
-  if (perfilError || !perfil) {
-    mensajeError.textContent = 'No se pudo cargar el perfil';
-    mensajeError.classList.add('error-text');
-    return;
-  }
+        if (!response.ok || result.error) {
+            // El servidor respondió con un error (401, 500, etc.)
+            mensajeError.textContent = result.error || 'Credenciales incorrectas.';
+            mensajeError.classList.add('error-text');
+            return;
+        }
 
-  // 💾 Guardar sesión completa
-  sessionStorage.setItem('loggedInUser', JSON.stringify({
-    user: authData.user,
-    info: perfil,
-    isAdmin: perfil.rol === 'admin'
-  }));
+        // 🚀 Éxito: El servidor blindado devolvió la confirmación
+        // El servidor ya estableció la cookie HTTP-Only para la sesión.
+        
+        // 🔄 Redirección Única y Genérica (Ruta de acceso principal)
+        // Redirige siempre a la página genérica para evitar exponer rutas sensibles.
+        window.location.href = 'dashboard.html'; 
 
-  // 🚀 Redirección según rol
-  window.location.href = perfil.rol === 'admin' ? 'admin.html' : 'main.html';
+    } catch (error) {
+        // Error de red o conexión
+        mensajeError.textContent = 'Error de conexión con el sistema. Intente más tarde.';
+        mensajeError.classList.add('error-text');
+    } finally {
+        loginButton.disabled = false;
+    }
 });
