@@ -1,6 +1,6 @@
 // Ruta: middleware.js (Nivel Hacker Profesional)
-
-import { NextResponse } from '@vercel/next/server';
+export const runtime = 'edge';
+import { NextResponse } from 'next/server';
 
 // 1. 🛑 CONFIGURACIÓN DE DEFENSA
 // Define los patrones de escaneo y bot con puntuaciones de riesgo
