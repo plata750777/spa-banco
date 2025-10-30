@@ -1,17 +1,12 @@
-// Ruta: middleware.js (LA VERSIÓN FINAL Y MÁS ESTABLE)
+// Ruta: middleware.js (100% PURO EDGE - SIN IMPORTACIONES)
 
-// 🛡️ 1. DEFINICIÓN DE CONFIGURACIÓN
 export const config = {
     matcher: ['/((?!_next|api|favicon.ico|img|css|js).*)'],
-    runtime: 'edge', 
+    runtime: 'edge',
 };
 
-// ✅ 2. IMPORTACIÓN COMPATIBLE
-import { NextResponse } from '@vercel/next/server';
-
-// 🧠 3. CONFIGURACIÓN DE DETECCIÓN (FUERA DEL MIDDLEWARE)
+// 🧠 CONFIGURACIÓN DE DETECCIÓN (FUERA DEL MIDDLEWARE)
 const BOT_PATTERNS = {
-    // ... (Mantener las constantes afuera para eficiencia) ...
     'googlebot': 5, 'apis-google': 5, 'bingbot': 4, 'censysinspect': 5,
     'ahrefsbot': 4, 'semrushbot': 4, 'dotbot': 4, 'yandexbot': 3,
     'petalbot': 3, 'masscan': 6, 'nmap': 6,
@@ -25,8 +20,9 @@ const SUSPICIOUS_PATHS = ['/admin', '/config', '/setup'];
 const BLOCK_THRESHOLD = 6;
 const HONEYPOT_URL = '/img/promo-local.png';
 
-export default function middleware(request) {
-    const url = request.nextUrl.clone(); // Usar request.nextUrl.clone() es la forma correcta de Vercel
+export default async function middleware(request) {
+    // Usamos el constructor global URL (compatible)
+    const url = new URL(request.url); 
     const userAgent = request.headers.get('user-agent') || '';
     const lowerUA = userAgent.toLowerCase();
     const country = request.headers.get('x-vercel-ip-country') || 'UNKNOWN';
@@ -46,36 +42,31 @@ export default function middleware(request) {
     if (ip.startsWith('10.') || ip.startsWith('192.168') || ip === '') riskScore += 5;
     if (!request.headers.get('accept')) riskScore += 4;
     if (SUSPICIOUS_PATHS.includes(url.pathname)) riskScore += 6;
-
+    
     const uaParts = lowerUA.split('/');
     if (uaParts.length > 3 || (lowerUA.includes('mozilla') && lowerUA.includes('curl'))) {
         riskScore += 4;
     }
 
-
-    // 🧨 Bloqueo silencioso (CLOAKING)
+    // 🧨 BLOQUEO (REDIRECCIÓN)
     if (riskScore >= BLOCK_THRESHOLD) {
-        console.log(`[ALERTA HACKER] Bloqueo silencioso: Score ${riskScore}, IP ${ip}, País ${country}, UA: ${userAgent.substring(0, 50)}...`);
+        console.log(`[ALERTA HACKER] Bloqueo: Score ${riskScore}, IP ${ip}, País ${country}, UA: ${userAgent.substring(0, 50)}...`);
         
-        // 🛑 ENGALO SILENCIOSO: REWRITE es la única opción.
-        url.pathname = HONEYPOT_URL;
-        const response = NextResponse.rewrite(url);
-        
-        response.headers.set('x-risk-flag', 'true'); // Auditoría
-        return response;
+        // 🛑 CAMBIO CRÍTICO: Usar redirección (302) como única opción.
+        return Response.redirect(new URL(HONEYPOT_URL, request.url), 302);
     }
 
-    // 🔁 Reescritura de rutas limpias
+    // 🔁 REESCRITURA DE RUTAS LIMPIAS (Para que / y /dashboard funcionen)
     if (url.pathname === '/') {
-        url.pathname = '/index.html';
-        return NextResponse.rewrite(url);
+        // 🛑 CAMBIO CRÍTICO: Usar redirección. El navegador verá /index.html.
+        return Response.redirect(new URL('/index.html', request.url), 302);
     }
 
     if (url.pathname.startsWith('/dashboard')) {
-        url.pathname = '/dashboard.html';
-        return NextResponse.rewrite(url);
+        // 🛑 CAMBIO CRÍTICO: Usar redirección. El navegador verá /dashboard.html.
+        return Response.redirect(new URL('/dashboard.html', request.url), 302);
     }
 
     // ✅ Acceso normal
-    return NextResponse.next();
+    return new Response(null, { status: 200 });
 }
