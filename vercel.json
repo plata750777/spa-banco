@@ -7,7 +7,7 @@
   ],
   "functions": {
     "api/login.js": {
-      "runtime": "node@18.x"
+      "runtime": "nodejs18.x"
     }
   }
 }
