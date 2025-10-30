@@ -4,10 +4,5 @@
       "source": "/(.*)",
       "destination": "/$1"
     }
-  ],
-  "functions": {
-    "api/login.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  ]
 }
